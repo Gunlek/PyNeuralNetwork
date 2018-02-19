@@ -1,0 +1,38 @@
+v_activation = np.vectorize(self.activation)
+self.hiddens = self.w_ih.dot(inputs)
+self.hiddens += self.bias_h
+self.hiddens = v_activation(self.hiddens)
+
+self.outputs = self.w_ho.dot(self.hiddens)
+self.outputs += self.bias_o
+self.outputs = v_activation(self.outputs)
+
+# Calculate final error
+outputs_errors = targets - self.outputs
+
+# Calculate gradient
+gradients = v_activation(self.outputs)
+gradients = gradients.dot(outputs_errors)
+gradients = self.learning_rate * gradients
+
+# Calculate deltas
+hidden_transpose = self.hiddens.transpose()
+deltas_ho = gradients.dot(hidden_transpose)
+
+self.w_ho += deltas_ho
+self.bias_o += gradients
+
+# Repeat for hidden layer
+who_t = self.w_ho.transpose()
+hidden_errors = who_t.dot(outputs_errors)
+
+hidden_gradients = v_activation(self.hiddens)
+hidden_gradients = hidden_gradients.transpose()
+hidden_gradients = hidden_gradients.dot(hidden_errors)
+hidden_gradients = self.learning_rate * hidden_gradients
+
+inputs_transpose = inputs.transpose()
+deltas_ih = hidden_gradients.dot(inputs_transpose)
+
+self.w_ih += deltas_ih
+self.bias_h += hidden_gradients
